@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login or Signup - BloodLink</title>
+  <!-- Use url_for to link CSS -->
+  <link rel="stylesheet" href="{{ url_for('routes.static', filename='login.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <div id="welcome-screen">
+      <h2>Welcome to BloodLink!</h2>
+      <p>Your one-stop system for blood donation management.</p>
+      <button onclick="showLogin()">Continue</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="login-form" class="hidden">
+      <h2>Login</h2>
+      <!-- Add form tag and prevent default submission -->
+      <form id="loginForm">
+          <input type="email" id="login-email" placeholder="Email" required />
+          <input type="password" id="login-password" placeholder="Password" required />
+          <button type="submit">Login</button>
+          <p id="login-message" class="message"></p> <!-- For feedback -->
+      </form>
+      <p>New user? <a href="#" onclick="showSignup(); return false;">Sign up here</a></p>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signup-form" class="hidden">
+      <h2>Sign Up</h2>
+       <!-- Add form tag and prevent default submission -->
+      <form id="signupForm">
+          <input type="text" id="signup-name" placeholder="Name" required />
+          <input type="email" id="signup-email" placeholder="Email" required />
+          <input type="password" id="signup-password" placeholder="Password (min 6 chars)" required minlength="6" />
+          <button type="submit">Sign Up</button>
+          <p id="signup-message" class="message"></p> <!-- For feedback -->
+      </form>
+       <p>Already registered? <a href="#" onclick="showLogin(); return false;">Login here</a></p>
+    </div>
+  </div>
+
+  <script>
+    const welcomeScreen = document.getElementById('welcome-screen');
+    const loginFormDiv = document.getElementById('login-form');
+    const signupFormDiv = document.getElementById('signup-form');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const loginMessage = document.getElementById('login-message');
+    const signupMessage = document.getElementById('signup-message');
+
+    function showLogin() {
+      welcomeScreen.classList.add('hidden');
+      signupFormDiv.classList.add('hidden');
+      loginFormDiv.classList.remove('hidden');
+      clearMessages();
+    }
+
+    function showSignup() {
+      welcomeScreen.classList.add('hidden');
+      loginFormDiv.classList.add('hidden');
+      signupFormDiv.classList.remove('hidden');
+      clearMessages();
+    }
+
+    function clearMessages() {
+        loginMessage.textContent = '';
+        signupMessage.textContent = '';
+        loginMessage.className = 'message'; // Reset class
+        signupMessage.className = 'message'; // Reset class
+    }
+
+    function showMessage(element, text, isError) {
+        element.textContent = text;
+        element.className = isError ? 'message error' : 'message success';
+    }
+
+    // --- Login Form Submission ---
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Prevent default page reload
+      clearMessages();
+
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const response = await fetch('/login', { // Use relative URL to API endpoint
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          showMessage(loginMessage, result.message, false);
+          // Redirect on success
+          if (result.redirect_url) {
+              window.location.href = result.redirect_url; // Redirect to dashboard or donate page
+          } else {
+              // Fallback if no redirect URL provided
+              alert("Login Successful!"); // Replace with better UX later
+          }
+        } else {
+          showMessage(loginMessage, result.error || 'Login failed.', true);
+        }
+      } catch (error) {
+        console.error('Login fetch error:', error);
+        showMessage(loginMessage, 'Network error during login. Please try again.', true);
+      }
+    });
+
+    // --- Signup Form Submission ---
+    signupForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearMessages();
+
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+
+       if (password.length < 6) {
+           showMessage(signupMessage, 'Password must be at least 6 characters long.', true);
+           return; // Prevent fetch if basic client-side validation fails
+       }
+
+      try {
+        const response = await fetch('/signup', { // Use relative URL to API endpoint
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          showMessage(signupMessage, result.message, false);
+          signupForm.reset(); // Clear the form
+          // Optionally switch to login automatically after a short delay
+          setTimeout(showLogin, 2000); // Switch to login after 2 seconds
+        } else {
+          showMessage(signupMessage, result.error || 'Signup failed.', true);
+        }
+      } catch (error) {
+        console.error('Signup fetch error:', error);
+        showMessage(signupMessage, 'Network error during signup. Please try again.', true);
+      }
+    });
+
+    // --- Initial State ---
+    // Ensure only welcome screen is visible initially when JS runs
+    document.addEventListener('DOMContentLoaded', () => {
+        loginFormDiv.classList.add('hidden');
+        signupFormDiv.classList.add('hidden');
+        welcomeScreen.classList.remove('hidden');
+    });
+
+  </script>
+
+  <!-- Add some basic styling for messages -->
+  <style>
+      .message { margin-top: 10px; font-size: 0.9em; }
+      .message.success { color: green; }
+      .message.error { color: red; }
+      .hidden { display: none; }
+  </style>
+</body>
+</html>

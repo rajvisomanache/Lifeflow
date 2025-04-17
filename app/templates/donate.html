@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Donor - BloodLink</title>
+  <!-- Use url_for to link CSS -->
+  <link rel="stylesheet" href="{{ url_for('routes.static', filename='style.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <h2>Add New Donor</h2>
+  <form id="donorForm">
+    <label for="name">Name:</label><br>
+    <input type="text" id="name" placeholder="Enter donor's name" title="Donor's name" required><br>
+
+    <label for="blood_type">Blood Type:</label><br>
+    <input type="text" id="blood_type" placeholder="e.g. A+, B-, O+" title="Blood type (e.g., A+, B-, O+)" required pattern="^(A|B|AB|O)[+-]$" ><br> <!-- Added pattern for basic validation -->
+
+    <label for="contact_info">Contact Info:</label><br>
+    <input type="text" id="contact_info" placeholder="Phone or Email" title="Contact information"><br> <!-- Consider type="tel" or type="email" -->
+
+    <label for="last_donation_date">Last Donation Date:</label><br>
+    <input type="date" id="last_donation_date" title="Last donation date (YYYY-MM-DD)"><br><br>
+
+    <button type="submit">Submit Donor</button>
+  </form>
+
+  <p id="responseMessage" class="message"></p> <!-- Added class for styling -->
+
+  <script>
+    const donorForm = document.getElementById("donorForm");
+    const responseMessage = document.getElementById("responseMessage");
+
+    donorForm.addEventListener("submit", async function(event) {
+      event.preventDefault(); // Prevent default form submission
+      responseMessage.textContent = 'Submitting...'; // Provide feedback
+      responseMessage.className = 'message'; // Reset styling
+
+      // Basic validation example (more robust validation is better)
+      const bloodTypeInput = document.getElementById("blood_type");
+      const bloodTypePattern = /^(A|B|AB|O)[+-]$/i; // Case-insensitive check
+      if (!bloodTypePattern.test(bloodTypeInput.value)) {
+          responseMessage.textContent = 'Invalid Blood Type format. Use A+, B-, O+, etc.';
+          responseMessage.className = 'message error';
+          return;
+      }
+
+      const data = {
+        name: document.getElementById("name").value,
+        blood_type: bloodTypeInput.value.toUpperCase(), // Send consistent case
+        contact_info: document.getElementById("contact_info").value,
+        // Send null if date is empty, otherwise send the value
+        last_donation_date: document.getElementById("last_donation_date").value || null
+      };
+
+      try {
+        // Use relative URL for the fetch request
+        const response = await fetch("/donors", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          responseMessage.textContent = result.message || 'Donor added successfully!';
+          responseMessage.className = 'message success';
+          donorForm.reset(); // Clear form on success
+        } else {
+          responseMessage.textContent = result.error || 'Failed to add donor.';
+          responseMessage.className = 'message error';
+        }
+
+      } catch (error) {
+          console.error("Add donor fetch error:", error);
+          responseMessage.textContent = 'Network error. Could not submit donor information.';
+          responseMessage.className = 'message error';
+      }
+    });
+  </script>
+   <!-- Add some basic styling for messages -->
+  <style>
+      .message { margin-top: 15px; font-size: 1em; }
+      .message.success { color: green; }
+      .message.error { color: red; }
+  </style>
+</body>
+</html>
