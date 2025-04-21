@@ -3,42 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <title>Add Donor - BloodLink</title>
-  <!-- Use url_for to link CSS -->
   <link rel="stylesheet" href="{{ url_for('routes.static', filename='style.css') }}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fff5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .form-container {
+      background: #ffffff;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #d62828;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-weight: bold;
+      color: #444;
+    }
+
+    input[type="text"],
+    input[type="date"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #d62828;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #d62828;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #a61c1c;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-size: 1em;
+      text-align: center;
+    }
+
+    .message.success {
+      color: green;
+    }
+
+    .message.error {
+      color: red;
+    }
+
+    @media (max-width: 500px) {
+      .form-container {
+        padding: 1.5rem;
+      }
+
+      input, button {
+        font-size: 0.95rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>Add New Donor</h2>
-  <form id="donorForm">
-    <label for="name">Name:</label><br>
-    <input type="text" id="name" placeholder="Enter donor's name" title="Donor's name" required><br>
+  <div class="form-container">
+    <h2>Add New Donor</h2>
+    <form id="donorForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" placeholder="Enter donor's name" title="Donor's name" required>
 
-    <label for="blood_type">Blood Type:</label><br>
-    <input type="text" id="blood_type" placeholder="e.g. A+, B-, O+" title="Blood type (e.g., A+, B-, O+)" required pattern="^(A|B|AB|O)[+-]$" ><br> <!-- Added pattern for basic validation -->
+      <label for="blood_type">Blood Type:</label>
+      <input type="text" id="blood_type" placeholder="e.g. A+, B-, O+" title="Blood type (e.g., A+, B-, O+)" required pattern="^(A|B|AB|O)[+-]$">
 
-    <label for="contact_info">Contact Info:</label><br>
-    <input type="text" id="contact_info" placeholder="Phone or Email" title="Contact information"><br> <!-- Consider type="tel" or type="email" -->
+      <label for="contact_info">Contact Info:</label>
+      <input type="text" id="contact_info" placeholder="Phone or Email" title="Contact information">
 
-    <label for="last_donation_date">Last Donation Date:</label><br>
-    <input type="date" id="last_donation_date" title="Last donation date (YYYY-MM-DD)"><br><br>
+      <label for="last_donation_date">Last Donation Date:</label>
+      <input type="date" id="last_donation_date" title="Last donation date (YYYY-MM-DD)">
 
-    <button type="submit">Submit Donor</button>
-  </form>
+      <button type="submit">Submit Donor</button>
+    </form>
 
-  <p id="responseMessage" class="message"></p> <!-- Added class for styling -->
+    <p id="responseMessage" class="message"></p>
+  </div>
 
   <script>
     const donorForm = document.getElementById("donorForm");
     const responseMessage = document.getElementById("responseMessage");
 
     donorForm.addEventListener("submit", async function(event) {
-      event.preventDefault(); // Prevent default form submission
-      responseMessage.textContent = 'Submitting...'; // Provide feedback
-      responseMessage.className = 'message'; // Reset styling
+      event.preventDefault();
+      responseMessage.textContent = 'Submitting...';
+      responseMessage.className = 'message';
 
-      // Basic validation example (more robust validation is better)
       const bloodTypeInput = document.getElementById("blood_type");
-      const bloodTypePattern = /^(A|B|AB|O)[+-]$/i; // Case-insensitive check
+      const bloodTypePattern = /^(A|B|AB|O)[+-]$/i;
       if (!bloodTypePattern.test(bloodTypeInput.value)) {
           responseMessage.textContent = 'Invalid Blood Type format. Use A+, B-, O+, etc.';
           responseMessage.className = 'message error';
@@ -47,14 +141,12 @@
 
       const data = {
         name: document.getElementById("name").value,
-        blood_type: bloodTypeInput.value.toUpperCase(), // Send consistent case
+        blood_type: bloodTypeInput.value.toUpperCase(),
         contact_info: document.getElementById("contact_info").value,
-        // Send null if date is empty, otherwise send the value
         last_donation_date: document.getElementById("last_donation_date").value || null
       };
 
       try {
-        // Use relative URL for the fetch request
         const response = await fetch("/donors", {
           method: "POST",
           headers: {
@@ -68,7 +160,7 @@
         if (response.ok) {
           responseMessage.textContent = result.message || 'Donor added successfully!';
           responseMessage.className = 'message success';
-          donorForm.reset(); // Clear form on success
+          donorForm.reset();
         } else {
           responseMessage.textContent = result.error || 'Failed to add donor.';
           responseMessage.className = 'message error';
@@ -81,11 +173,5 @@
       }
     });
   </script>
-   <!-- Add some basic styling for messages -->
-  <style>
-      .message { margin-top: 15px; font-size: 1em; }
-      .message.success { color: green; }
-      .message.error { color: red; }
-  </style>
 </body>
 </html>

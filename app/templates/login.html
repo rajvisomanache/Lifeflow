@@ -4,8 +4,138 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login or Signup - BloodLink</title>
-  <!-- Use url_for to link CSS -->
   <link rel="stylesheet" href="{{ url_for('routes.static', filename='login.css') }}" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url("{{ url_for('C:\Users\imaba\Downloads\man-giving-red-ornament-heart-woman.jpg', filename='images/blood-donation-bg.jpg') }}") no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.3); /* Light overlay */
+      backdrop-filter: blur(4px); /* Frosted glass effect */
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 90%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.75);
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+      backdrop-filter: blur(8px);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+      color: #d62828;
+      margin-bottom: 1rem;
+      font-size: 1.75rem;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      color: #333;
+      font-size: 1rem;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 1rem;
+      background-color: #fffafc;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #d62828;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #a61c1c;
+      transform: translateY(-1px);
+    }
+
+    a {
+      color: #b30000;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+
+    .message.success {
+      color: green;
+    }
+
+    .message.error {
+      color: red;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 500px) {
+      .container {
+        padding: 1.5rem;
+        border-radius: 12px;
+      }
+
+      input, button {
+        font-size: 0.95rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -18,12 +148,11 @@
     <!-- Login Form -->
     <div id="login-form" class="hidden">
       <h2>Login</h2>
-      <!-- Add form tag and prevent default submission -->
       <form id="loginForm">
           <input type="email" id="login-email" placeholder="Email" required />
           <input type="password" id="login-password" placeholder="Password" required />
           <button type="submit">Login</button>
-          <p id="login-message" class="message"></p> <!-- For feedback -->
+          <p id="login-message" class="message"></p>
       </form>
       <p>New user? <a href="#" onclick="showSignup(); return false;">Sign up here</a></p>
     </div>
@@ -31,15 +160,14 @@
     <!-- Signup Form -->
     <div id="signup-form" class="hidden">
       <h2>Sign Up</h2>
-       <!-- Add form tag and prevent default submission -->
       <form id="signupForm">
           <input type="text" id="signup-name" placeholder="Name" required />
           <input type="email" id="signup-email" placeholder="Email" required />
           <input type="password" id="signup-password" placeholder="Password (min 6 chars)" required minlength="6" />
           <button type="submit">Sign Up</button>
-          <p id="signup-message" class="message"></p> <!-- For feedback -->
+          <p id="signup-message" class="message"></p>
       </form>
-       <p>Already registered? <a href="#" onclick="showLogin(); return false;">Login here</a></p>
+      <p>Already registered? <a href="#" onclick="showLogin(); return false;">Login here</a></p>
     </div>
   </div>
 
@@ -67,27 +195,26 @@
     }
 
     function clearMessages() {
-        loginMessage.textContent = '';
-        signupMessage.textContent = '';
-        loginMessage.className = 'message'; // Reset class
-        signupMessage.className = 'message'; // Reset class
+      loginMessage.textContent = '';
+      signupMessage.textContent = '';
+      loginMessage.className = 'message';
+      signupMessage.className = 'message';
     }
 
     function showMessage(element, text, isError) {
-        element.textContent = text;
-        element.className = isError ? 'message error' : 'message success';
+      element.textContent = text;
+      element.className = isError ? 'message error' : 'message success';
     }
 
-    // --- Login Form Submission ---
     loginForm.addEventListener('submit', async (event) => {
-      event.preventDefault(); // Prevent default page reload
+      event.preventDefault();
       clearMessages();
 
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
 
       try {
-        const response = await fetch('/login', { // Use relative URL to API endpoint
+        const response = await fetch('/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
@@ -97,12 +224,10 @@
 
         if (response.ok) {
           showMessage(loginMessage, result.message, false);
-          // Redirect on success
           if (result.redirect_url) {
-              window.location.href = result.redirect_url; // Redirect to dashboard or donate page
+              window.location.href = result.redirect_url;
           } else {
-              // Fallback if no redirect URL provided
-              alert("Login Successful!"); // Replace with better UX later
+              alert("Login Successful!");
           }
         } else {
           showMessage(loginMessage, result.error || 'Login failed.', true);
@@ -113,7 +238,6 @@
       }
     });
 
-    // --- Signup Form Submission ---
     signupForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       clearMessages();
@@ -122,13 +246,13 @@
       const email = document.getElementById('signup-email').value;
       const password = document.getElementById('signup-password').value;
 
-       if (password.length < 6) {
-           showMessage(signupMessage, 'Password must be at least 6 characters long.', true);
-           return; // Prevent fetch if basic client-side validation fails
-       }
+      if (password.length < 6) {
+        showMessage(signupMessage, 'Password must be at least 6 characters long.', true);
+        return;
+      }
 
       try {
-        const response = await fetch('/signup', { // Use relative URL to API endpoint
+        const response = await fetch('/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password })
@@ -138,9 +262,8 @@
 
         if (response.ok) {
           showMessage(signupMessage, result.message, false);
-          signupForm.reset(); // Clear the form
-          // Optionally switch to login automatically after a short delay
-          setTimeout(showLogin, 2000); // Switch to login after 2 seconds
+          signupForm.reset();
+          setTimeout(showLogin, 2000);
         } else {
           showMessage(signupMessage, result.error || 'Signup failed.', true);
         }
@@ -150,22 +273,11 @@
       }
     });
 
-    // --- Initial State ---
-    // Ensure only welcome screen is visible initially when JS runs
     document.addEventListener('DOMContentLoaded', () => {
-        loginFormDiv.classList.add('hidden');
-        signupFormDiv.classList.add('hidden');
-        welcomeScreen.classList.remove('hidden');
+      loginFormDiv.classList.add('hidden');
+      signupFormDiv.classList.add('hidden');
+      welcomeScreen.classList.remove('hidden');
     });
-
   </script>
-
-  <!-- Add some basic styling for messages -->
-  <style>
-      .message { margin-top: 10px; font-size: 0.9em; }
-      .message.success { color: green; }
-      .message.error { color: red; }
-      .hidden { display: none; }
-  </style>
 </body>
 </html>
